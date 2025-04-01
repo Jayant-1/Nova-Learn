@@ -1,0 +1,7 @@
+Flask
+markupsafe
+langchain
+langchain-google-genai
+python-dotenv
+markdown
+sockets
