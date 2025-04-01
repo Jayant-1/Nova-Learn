@@ -1,4 +1,12 @@
-from flask import Flask, request, render_template, jsonify, redirect, url_for
+from flask import (
+    Flask,
+    request,
+    render_template,
+    jsonify,
+    redirect,
+    url_for,
+    send_from_directory,
+)
 from markupsafe import Markup  # Import Markup from markupsafe instead of flask
 from langchain_google_genai import ChatGoogleGenerativeAI
 from langchain.prompts import PromptTemplate
@@ -14,7 +22,7 @@ if not os.path.exists(templates_dir):
     os.makedirs(templates_dir)
 
 # Initialize Flask app
-app = Flask(__name__, static_folder='static')
+app = Flask(__name__, static_folder="static")
 
 # Load environment variables (e.g., GOOGLE_API_KEY)
 load_dotenv()
@@ -46,6 +54,7 @@ prompt = PromptTemplate(
     input_variables=["text_content"],
 )
 
+
 # Function to generate roadmap
 def generate(text_content):
     # Initialize the Google Generative AI model
@@ -57,16 +66,17 @@ def generate(text_content):
         timeout=60,  # Increased timeout for complex responses
         max_retries=3,  # Increased retries for better reliability
     )
-    
+
     # Create an LLMChain with the prompt and model
     chain = LLMChain(llm=llm, prompt=prompt)
-    
+
     # Run the chain with the input subject
     try:
         response = chain.invoke({"text_content": text_content})
         return response["text"]  # Extract text from the response dictionary
     except Exception as e:
         return f"Error generating roadmap: {str(e)}"
+
 
 # Custom function to convert markdown to HTML
 def md_to_html(text):
@@ -77,21 +87,23 @@ def md_to_html(text):
         # Fall back to preformatted text if there's any issue
         return Markup(f"<pre>{text}</pre>")
 
+
 # Register filter with Jinja
-app.jinja_env.filters['md_to_html'] = md_to_html
+app.jinja_env.filters["md_to_html"] = md_to_html
+
 
 # Route for the homepage with form (original index.html)
-@app.route('/results', methods=['GET', 'POST'])
+@app.route("/results", methods=["GET", "POST"])
 def results():
     roadmap = None
     error = None
     subject = None
-    
-    if request.method == 'POST':
+
+    if request.method == "POST":
         # Get the subject from the form
-        text_content = request.form.get('text_content')
+        text_content = request.form.get("text_content")
         subject = text_content  # Store for displaying back to the user
-        
+
         if text_content:
             try:
                 # Generate the roadmap
@@ -103,34 +115,42 @@ def results():
                 error = f"Application error: {str(e)}"
         else:
             error = "Please enter a subject for the roadmap"
-            
-    return render_template('index.html', roadmap=roadmap, error=error, subject=subject)
+
+    return render_template("index.html", roadmap=roadmap, error=error, subject=subject)
+
 
 # Main route for the landing page (main.html)
-@app.route('/', methods=['GET'])
+@app.route("/", methods=["GET"])
 def main():
-    return render_template('main.html')
+    # Debugging: Print the file path being served
+    file_path = os.path.join(os.path.dirname(__file__), "index.html")
+    print(f"Serving file from: {file_path}")
+
+    # Serve main.html from the Nova-Learn directory
+    return send_from_directory(os.path.dirname(__file__), "index.html")
+
 
 # API endpoint to handle the search from main.html
-@app.route('/api/search', methods=['POST'])
+@app.route("/api/search", methods=["POST"])
 def search():
     data = request.json
-    query = data.get('query')
-    
+    query = data.get("query")
+
     if not query:
         return jsonify({"error": "No query provided"}), 400
-    
+
     # Redirect to results page with the query
     return jsonify({"redirect": f"/results?query={query}"})
 
+
 # Route to handle the form submission from main.html
-@app.route('/generate', methods=['POST'])
+@app.route("/generate", methods=["POST"])
 def generate_from_main():
-    query = request.form.get('promptInput')
-    
+    query = request.form.get("promptInput")
+
     if not query:
-        return redirect('/')
-    
+        return redirect("/")
+
     try:
         # Generate the roadmap
         roadmap = generate(query)
@@ -142,13 +162,15 @@ def generate_from_main():
     except Exception as e:
         error = f"Application error: {str(e)}"
         roadmap = None
-        
-    return render_template('index.html', roadmap=roadmap, error=error, subject=query)
+
+    return render_template("index.html", roadmap=roadmap, error=error, subject=query)
+
 
 # Add a health check endpoint
-@app.route('/health', methods=['GET'])
+@app.route("/health", methods=["GET"])
 def health_check():
     return jsonify({"status": "ok"})
+
 
 # Get the local IP address
 def get_local_ip():
@@ -162,48 +184,51 @@ def get_local_ip():
     except Exception:
         return "127.0.0.1"  # Fallback to localhost
 
+
 # Run the Flask app
-if __name__ == '__main__':
+if __name__ == "__main__":
     # Move the templates to the right location
     current_dir = os.path.dirname(os.path.abspath(__file__))
-    
+
     # Check if templates directory exists, create if not
     templates_dir = os.path.join(current_dir, "templates")
     if not os.path.exists(templates_dir):
         os.makedirs(templates_dir)
-    
+
     # Ensure main.html is in the templates directory
-    main_source = os.path.join(current_dir, "main.html")
-    main_dest = os.path.join(templates_dir, "main.html")
+    main_source = os.path.join(current_dir, "index.html")
+    main_dest = os.path.join(templates_dir, "index.html")
     if os.path.exists(main_source) and not os.path.exists(main_dest):
         import shutil
+
         shutil.copy(main_source, main_dest)
-    
+
     # Ensure index.html is in the templates directory
     index_source = os.path.join(current_dir, "index.html")
     index_dest = os.path.join(templates_dir, "index.html")
     if os.path.exists(index_source) and not os.path.exists(index_dest):
         import shutil
+
         shutil.copy(index_source, index_dest)
-    
+
     # Create static directory for CSS, JS, and images
     static_dir = os.path.join(current_dir, "static")
     if not os.path.exists(static_dir):
         os.makedirs(static_dir)
-        
+
     # Create subdirectories in static
-    for subdir in ['css', 'js', 'Img']:
+    for subdir in ["css", "js", "Img"]:
         subdir_path = os.path.join(static_dir, subdir)
         if not os.path.exists(subdir_path):
             os.makedirs(subdir_path)
-    
+
     # Get the local IP address
     local_ip = get_local_ip()
     port = 5000
-    
+
     print(f"Starting server...")
     print(f"Access the application on this device at: http://127.0.0.1:{port}")
     print(f"Access from other devices on your network at: http://{local_ip}:{port}")
-    
+
     # Run the Flask app on all network interfaces (0.0.0.0)
-    app.run(host='0.0.0.0', port=port, debug=True)
+    app.run(host="0.0.0.0", port=port, debug=True)
