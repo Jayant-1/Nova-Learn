@@ -122,6 +122,8 @@
     overflow-y: scroll;
     display: flex;
     flex-direction: column;
+    position: relative;
+    z-index: 1;
     scrollbar-width: none; /* Firefox */
     -ms-overflow-style: none; /* IE and Edge */
     &::-webkit-scrollbar {
@@ -147,7 +149,9 @@
       scroll-snap-align: end;
     }
   }
-
+  [data-snap="true"].scroll-active {
+    z-index: 2;
+  }
   h2,
   li:last-of-type {
     background: linear-gradient(
