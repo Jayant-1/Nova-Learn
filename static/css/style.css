@@ -1,0 +1,341 @@
+body {
+  font-family: "Exo 2", sans-serif;
+  margin: 0;
+  padding: 0;
+}
+header nav {
+  display: flex;
+  align-items: center;
+  height: 15vh;
+}
+header {
+  font-optical-sizing: auto;
+  font-weight: 400;
+  font-style: normal;
+  place-items: normal;
+  display: flex;
+  flex-direction: column;
+  padding-inline: 0;
+}
+.nav-list li a {
+  text-decoration: none;
+  color: inherit;
+  font-size: 1.6rem;
+  padding: 0.5rem 1rem;
+  display: block;
+  transition: background-color 0.3s ease;
+  word-spacing: 1px;
+}
+
+.nav-list li a:hover {
+  transform: scale(1.1) translateY(-2px) rotate(-05deg) skew(-2deg);
+  transition: transform 0.3s ease, background-color 0.3s ease;
+  background-color: rgba(255, 255, 255, 0.1);
+  border-radius: 5px;
+  color: #fff;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+nav .nav-list {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto;
+  width: 100%;
+  max-width: 1200px;
+  padding: 0 2rem;
+  gap: 2rem;
+}
+
+#sign {
+  display: flex;
+  align-items: center;
+  margin: 0 auto;
+}
+#btn-sign {
+  background-color: aliceblue;
+  color: #0a0a0a;
+  border: none;
+  padding: 0.5rem 2rem;
+  border-radius: 10px;
+  font-size: 1.6rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+#btn-sign:hover {
+  border: 2px solid #fff;
+  background-color: #000000;
+  color: #fff;
+  font-family: monospace;
+  font-weight: 600;
+  transform: scale(1.1);
+  transition: transform 0.3s ease, background-color 0.3s ease, color 0.3s ease;
+}
+#prompt {
+  width: 49vw;
+}
+#robot {
+  width: 50vw;
+  position: relative;
+}
+#main-div {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: row;
+  height: 85vh;
+}
+#blackspot {
+  position: absolute;
+  bottom: 21px;
+  right: 15px;
+  width: 150px;
+  height: 38px;
+  background-color: black;
+  z-index: 4;
+}
+
+.card {
+  margin: 0 auto;
+  padding: 2em;
+  width: 35vw;
+  background: #0a0a0a;
+  text-align: center;
+  border-radius: 35px;
+  position: relative;
+}
+
+@property --angle {
+  syntax: "<angle>";
+  initial-value: 0deg;
+  inherits: false;
+}
+
+.card::after,
+.card::before {
+  content: "";
+  position: absolute;
+  height: 100%;
+  width: 100%;
+  background-image: conic-gradient(
+    from var(--angle),
+    #ff4545,
+    #00ff99,
+    #006aff,
+    #ff0095,
+    #ff4545
+  );
+  top: 50%;
+  left: 50%;
+  translate: -50% -50%;
+  z-index: -1;
+  padding: 3px;
+  border-radius: 35px;
+  animation: 3s spin linear infinite;
+}
+.card::before {
+  filter: blur(1.5rem);
+  opacity: 0.5;
+}
+@keyframes spin {
+  from {
+    --angle: 0deg;
+  }
+  to {
+    --angle: 360deg;
+  }
+}
+#text {
+  font-size: 2rem;
+  color: #fff;
+  font-weight: 600;
+  text-align: center;
+  margin-top: 1rem;
+  text-shadow: 0px 0px 10px rgba(0, 0, 0, 0.5);
+}
+.searchBox {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  background: #2f3640;
+  border-radius: 50px;
+  position: relative;
+}
+
+.searchButton {
+  color: white;
+  position: absolute;
+  right: 8px;
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  background: var(
+    --gradient-2,
+    linear-gradient(90deg, #2af598 0%, #009efd 100%)
+  );
+  border: 0;
+  display: inline-block;
+  transition: all 300ms cubic-bezier(0.23, 1, 0.32, 1);
+}
+searchButton:hover {
+  color: #fff;
+  background-color: #1a1a1a;
+  box-shadow: rgba(0, 0, 0, 0.5) 0 10px 20px;
+  transform: translateY(-3px);
+}
+/*button pressing effect*/
+searchButton:active {
+  box-shadow: none;
+  transform: translateY(0);
+}
+
+.searchInput {
+  border: none;
+  background: none;
+  outline: none;
+  width: 400px;
+  color: white;
+  font-size: 1.5rem;
+  padding: 17px 46px 17px 20px;
+}
+
+:root {
+  --purple: #1d2b38;
+}
+
+@font-face {
+  font-family: "Decovar Draw";
+  src: url("https://s3-us-west-2.amazonaws.com/s.cdpn.io/209981/DecovarDRAW-VF.ttf");
+}
+
+h1 {
+  margin: 0;
+  font-size: 15vw;
+  position: relative;
+  font-weight: 400;
+  letter-spacing: 1rem;
+  font-family: "Decovar Draw";
+  font-variation-settings: "DRAW" 0; /* Change from 'RSEC' 60.00 to match the animation */
+  animation: draw 4s infinite;
+
+  background: linear-gradient(
+    to bottom,
+    #a67d83 0%,
+    #616cd3 20%,
+    #84fafc 43%,
+    #fdfbf3 60%,
+    #f9f697 82%,
+    #f4d186 100%
+  );
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  align-content: center;
+  text-align: center;
+}
+
+h1::before {
+  content: attr(data-text);
+  width: 100%;
+  position: absolute;
+  left: 0;
+  top: 0;
+  z-index: -1;
+  text-shadow: -1px -1px 0 var(--purple), 1px -1px 0 var(--purple),
+    -1px 1px 0 var(--purple), 1px 1px 0 var(--purple), 1px 0px 0px var(--purple),
+    0px 1px 0px var(--purple), 2px 1px 0px var(--purple),
+    1px 2px 0px var(--purple), 3px 2px 0px var(--purple),
+    2px 3px 0px var(--purple), 4px 3px 0px var(--purple),
+    3px 4px 0px var(--purple), 5px 4px 0px var(--purple),
+    3px 5px 0px var(--purple), 6px 5px 0px var(--purple),
+    -1px 2px 0 var(--purple), 0 3px 0 var(--purple), 1px 4px 0 var(--purple),
+    2px 5px 0px var(--purple), 2px -1px 0 var(--purple), 3px 0 0 var(--purple),
+    4px 1px 0 var(--purple), 5px 2px 0px var(--purple), 6px 3px 0 var(--purple),
+    7px 4px 0 var(--purple), 7px 5px 0 var(--purple);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+}
+
+span::before {
+  content: attr(data-text);
+  width: 100%;
+  position: absolute;
+  left: 0;
+  top: 0;
+  z-index: -3;
+  transform: translate(10px, 5px);
+  text-shadow: -1px -1px 0 var(--purple), 1px -1px 0 var(--purple),
+    -1px 1px 0 var(--purple), 1px 1px 0 var(--purple), 1px 0px 0px var(--purple),
+    0px 1px 0px var(--purple), 2px 1px 0px var(--purple),
+    1px 2px 0px var(--purple), 3px 2px 0px var(--purple),
+    2px 3px 0px var(--purple), 4px 3px 0px var(--purple),
+    3px 4px 0px var(--purple), 5px 4px 0px var(--purple),
+    3px 5px 0px var(--purple), 6px 5px 0px var(--purple),
+    -1px 2px 0 var(--purple), 0 3px 0 var(--purple), 1px 4px 0 var(--purple),
+    2px 5px 0px var(--purple), 2px -1px 0 var(--purple), 3px 0 0 var(--purple),
+    4px 1px 0 var(--purple), 5px 2px 0px var(--purple), 6px 3px 0 var(--purple),
+    7px 4px 0 var(--purple), 7px 5px 0 var(--purple);
+}
+
+h1::after {
+  content: attr(data-text);
+  width: 100%;
+  position: absolute;
+  left: 0;
+  top: 0;
+  transform: translate(10px, 5px);
+  z-index: -2;
+  background: linear-gradient(
+    to bottom,
+    #a67d83 0%,
+    #616cd3 20%,
+    #84fafc 43%,
+    #fdfbf3 60%,
+    #f9f697 82%,
+    #f4d186 100%
+  );
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: draw 4.1s infinite;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+}
+
+@keyframes draw {
+  0% {
+    font-variation-settings: "DRAW" 1000;
+  }
+  50% {
+    font-variation-settings: "DRAW" 0;
+  }
+  100% {
+    font-variation-settings: "DRAW" 1000;
+  }
+}
+
+#logo-img {
+  height: 9vh;
+  border-radius: 9px;
+  display: flex;
+}
+#logo-img:hover {
+  transform: scale(1.1) rotate(-5deg) skew(-2deg);
+  transition: transform 0.3s ease;
+}
+#logo {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin: 0 auto;
+}

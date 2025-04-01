@@ -1,0 +1,227 @@
+@import url('https://fonts.googleapis.com/css2?family=Finger+Paint&display=swap');
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    -webkit-font-smoothing: antialiased;
+}
+
+html {
+    scroll-behavior: smooth;
+}
+
+body {
+    background-color: #f0f0f0;
+    font-family: 'Finger Paint', cursive;
+    color: #333;
+    line-height: 1.6;
+    overflow-x: hidden;
+    height: 100vh;
+}
+
+section {
+    height: 100vh;
+    overflow-y: scroll;
+    scroll-snap-type: y mandatory;
+}
+
+section > div {
+    scroll-snap-align: start;
+    min-height: 100vh;
+    width: 100%;
+}
+
+.bg {
+    background-image: url(../Img/Untitled-8.jpg);
+    background-size: cover;
+    background-position: center;
+    display: flex;
+    justify-content: center;
+    position: relative;
+}
+
+
+.container {
+    width: 850px;
+    padding: 2.5rem;
+    margin-top: 20px;
+    text-align: center;
+    z-index: 2;
+    transition: transform 0.5s ease;
+}
+
+h1 {
+    font-size: 3.5rem;
+    margin-bottom: 1.5rem;
+    color: #2c3e50;
+}
+
+p {
+    font-size: 1.2rem;
+    margin-bottom: 1rem;
+    max-width: 800px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.team-section {
+    padding: 4rem 2rem;
+    background-image: url(../Img/Untitled-6.jpg);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.team {
+    font-size: 2.5rem;
+    text-align: center;
+    margin-bottom: 5rem;
+    color: #2c3e50;
+    position: relative;
+}
+
+.team::after {
+    content: '';
+    display: block;
+    width: 100px;
+    height: 4px;
+    background-color: #3498db;
+    margin: 0.5rem auto 0;
+}
+
+.team-cards {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 2rem;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.card {
+    width: 300px;
+    background-color: #fff;
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.card:hover {
+    transform: translateY(-10px);
+    box-shadow: 0 15px 20px rgba(0, 0, 0, 0.2);
+}
+
+.card-image {
+    height: 250px;
+    overflow: hidden;
+}
+
+.card-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.5s ease;
+}
+
+.card:hover .card-image img {
+    transform: scale(1.1);
+}
+
+.card-info {
+    padding: 1.5rem;
+    text-align: center;
+}
+
+.card-title {
+    font-size: 1.5rem;
+    margin-bottom: 0.5rem;
+    color: #2c3e50;
+}
+
+.card-description {
+    font-size: 1rem;
+    color: #7f8c8d;
+    margin-bottom: 1rem;
+}
+
+.card-mediaIcons {
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
+}
+
+.card-mediaIcons a {
+    display: inline-block;
+    width: 40px;
+    height: 40px;
+    background-color: #f0f0f0;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background-color 0.3s ease;
+}
+
+.card-mediaIcons a:hover {
+    background-color: #3498db;
+}
+
+.card-mediaIcons img {
+    width: 20px;
+    height: 20px;
+    filter: invert(40%);
+    transition: filter 0.3s ease;
+}
+
+.card-mediaIcons a:hover img {
+    filter: invert(100%);
+}
+
+/* Scroll indicators */
+.scroll-indicator {
+    position: absolute;
+    bottom: 30px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    color: white;
+    z-index: 10;
+    opacity: 0.8;
+    transition: opacity 0.3s ease;
+}
+
+.scroll-indicator:hover {
+    opacity: 1;
+}
+
+.scroll-indicator span {
+    font-size: 12px;
+    margin-bottom: 5px;
+}
+
+.scroll-indicator .chevron {
+    width: 30px;
+    height: 30px;
+    border: 2px solid white;
+    border-width: 0 2px 2px 0;
+    transform: rotate(45deg);
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0% {
+        transform: rotate(45deg) translate(0, 0);
+        opacity: 0;
+    }
+    50% {
+        opacity: 1;
+    }
+    100% {
+        transform: rotate(45deg) translate(10px, 10px);
+        opacity: 0;
+    }
+}
