@@ -5,7 +5,10 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Nova-Learn</title>
-    <link rel="stylesheet" href="../css/login.css" />
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='css/login.css') }}"
+    />
     <link
       href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css"
       rel="stylesheet"
@@ -14,54 +17,91 @@
 
   <body>
     <div class="container" id="container">
+      <!-- Sign Up Form -->
       <div class="form-container sign-up">
-        <form>
+        <form action="{{ url_for('register') }}" method="POST">
           <h1>Create Account</h1>
           <div class="social-icons">
             <a href="#" class="icon"
-              ><img src="../Img/google-brands-solid.svg" alt=""
+              ><img
+                src="{{ url_for('static', filename='Img/google-brands-solid.svg') }}"
+                alt=""
             /></a>
             <a href="#" class="icon"
-              ><img src="../Img/facebook-f-brands-solid.svg" alt=""
+              ><img
+                src="{{ url_for('static', filename='Img/facebook-f-brands-solid.svg') }}"
+                alt=""
             /></a>
             <a href="#" class="icon"
-              ><img src="../Img/github-brands-solid.svg" alt=""
+              ><img
+                src="{{ url_for('static', filename='Img/github-brands-solid.svg') }}"
+                alt=""
             /></a>
             <a href="#" class="icon"
-              ><img src="../Img/linkedin-in-brands-solid.svg" alt=""
+              ><img
+                src="{{ url_for('static', filename='Img/linkedin-in-brands-solid.svg') }}"
+                alt=""
             /></a>
           </div>
-          <span>or use your email for registeration</span>
-          <input type="text" placeholder="Name" />
-          <input type="email" placeholder="Email" />
-          <input type="password" placeholder="Password" />
-          <button>Sign Up</button>
+          <span>or use your email for registration</span>
+          <input type="text" name="name" placeholder="Name" required />
+          <input type="email" name="email" placeholder="Email" required />
+          <input
+            type="password"
+            name="password"
+            placeholder="Password"
+            required
+          />
+          <button type="submit">Sign Up</button>
         </form>
       </div>
+
+      <!-- Sign In Form -->
       <div class="form-container sign-in">
-        <form>
+        <!-- Flash Messages -->
+        {% with messages = get_flashed_messages(with_categories=true) %} {% if
+        messages %} {% for category, message in messages %}
+        <div class="flash-messages flash-{{ category }}">{{ message }}</div>
+        {% endfor %} {% endif %} {% endwith %}
+
+        <form action="{{ url_for('login') }}" method="POST">
           <h1>Sign In</h1>
           <div class="social-icons">
             <a href="#" class="icon"
-              ><img src="../Img/google-brands-solid.svg" alt=""
+              ><img
+                src="{{ url_for('static', filename='Img/google-brands-solid.svg') }}"
+                alt=""
             /></a>
             <a href="#" class="icon"
-              ><img src="../Img/facebook-f-brands-solid.svg" alt=""
+              ><img
+                src="{{ url_for('static', filename='Img/facebook-f-brands-solid.svg') }}"
+                alt=""
             /></a>
             <a href="#" class="icon"
-              ><img src="../Img/github-brands-solid.svg" alt=""
+              ><img
+                src="{{ url_for('static', filename='Img/github-brands-solid.svg') }}"
+                alt=""
             /></a>
             <a href="#" class="icon"
-              ><img src="../Img/linkedin-in-brands-solid.svg" alt=""
+              ><img
+                src="{{ url_for('static', filename='Img/linkedin-in-brands-solid.svg') }}"
+                alt=""
             /></a>
           </div>
           <span>or use your email password</span>
-          <input type="email" placeholder="Email" />
-          <input type="password" placeholder="Password" />
+          <input type="email" name="email" placeholder="Email" required />
+          <input
+            type="password"
+            name="password"
+            placeholder="Password"
+            required
+          />
           <a href="#">Forget Your Password?</a>
-          <button>Sign In</button>
+          <button type="submit">Sign In</button>
         </form>
       </div>
+
+      <!-- Toggle Panel -->
       <div class="toggle-container">
         <div class="toggle">
           <div class="toggle-panel toggle-left">
@@ -80,6 +120,6 @@
       </div>
     </div>
 
-    <script src="../js/login.js"></script>
+    <script src="{{ url_for('static', filename='js/login.js') }}"></script>
   </body>
 </html>

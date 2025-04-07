@@ -16,19 +16,8 @@
   :root {
     --start: 0;
     --end: 360;
-    --lightness: 65%;
-    --base-chroma: 0.3;
-  }
-  [data-theme="dark"] {
     --lightness: 75%;
-  }
-  [data-theme="light"] {
-    --lightness: 65%;
-  }
-  @media (prefers-color-scheme: dark) {
-    :root {
-      --lightness: 75%;
-    }
+    --base-chroma: 0.3;
   }
   ul {
     --step: calc((var(--end) - var(--start)) / (var(--count) - 1));
@@ -136,11 +125,14 @@
     }
     li {
       scroll-snap-align: center;
+      background-color: transparent !important;
       height: 100vh;
       display: flex;
       align-items: center;
       justify-content: flex-start;
       transition: opacity 0.3s, transform 0.3s;
+      background: black; /* Ensure list items match dark mode */
+      color: white;
     }
     li:first-of-type {
       scroll-snap-align: start;
@@ -155,8 +147,8 @@
   h2,
   li:last-of-type {
     background: linear-gradient(
-      canvasText 50%,
-      color-mix(in oklch, canvas, canvasText 25%)
+      white 50%,
+      color-mix(in oklch, black, white 25%)
     );
     background-clip: text;
     color: #0000;
@@ -188,7 +180,7 @@
       color-mix(in oklch, canvas, canvasText)
     );
     background-clip: text;
-    color: #0000;
+    color: white; /* Ensure text is visible on dark background */
   }
 }
 
@@ -201,19 +193,6 @@
     --font-width-min: 375;
     --font-width-max: 1500;
   }
-
-  html {
-    color-scheme: light dark;
-  }
-
-  [data-theme="light"] {
-    color-scheme: light only;
-  }
-
-  [data-theme="dark"] {
-    color-scheme: dark only;
-  }
-
   :where(.fluid) {
     --fluid-min: calc(
       var(--font-size-min) * pow(var(--font-ratio-min), var(--font-level, 0))
@@ -244,7 +223,8 @@
   body {
     display: grid;
     place-items: center;
-    background: light-dark(white, black);
+    background: black; /* Dark background */
+    color: white; /* Light text color */
     min-height: 100vh;
     font-family: "Geist", "SF Pro Text", "SF Pro Icons", "AOS Icons",
       "Helvetica Neue", Helvetica, Arial, sans-serif, system-ui;
@@ -252,7 +232,7 @@
 
   body::before {
     --size: 45px;
-    --line: color-mix(in hsl, canvasText, transparent 70%);
+    --line: color-mix(in hsl, white, transparent 70%);
     content: "";
     height: 100vh;
     width: 100vw;

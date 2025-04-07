@@ -24,6 +24,14 @@
     {% if roadmap %}
     <div class="roadmap">
         {{ roadmap | md_to_html }}
+        
+        <div class="confirmation-section">
+            <form action="/save-roadmap" method="POST">
+                <input type="hidden" name="subject" value="{{ subject }}">
+                <input type="hidden" name="roadmap" value="{{ roadmap }}">
+                <button type="submit" class="confirm-button">Confirm and Save Roadmap</button>
+            </form>
+        </div>
     </div>
     {% endif %}
 </body>
