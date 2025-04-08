@@ -7,7 +7,7 @@
     <title>Nova-Learn</title>
     <link
       rel="stylesheet"
-      href="{{ url_for('static', filename='css/login.css') }}"
+      href="../css/login.css"
     />
     <link
       href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css"
@@ -19,27 +19,27 @@
     <div class="container" id="container">
       <!-- Sign Up Form -->
       <div class="form-container sign-up">
-        <form action="{{ url_for('register') }}" method="POST">
+        <form action="" method="POST">
           <h1>Create Account</h1>
           <div class="social-icons">
             <a href="#" class="icon"
               ><img
-                src="{{ url_for('static', filename='Img/google-brands-solid.svg') }}"
+                src="../Img/google-brands-solid.svg"
                 alt=""
             /></a>
             <a href="#" class="icon"
               ><img
-                src="{{ url_for('static', filename='Img/facebook-f-brands-solid.svg') }}"
+                src="../Img/facebook-f-brands-solid.svg"
                 alt=""
             /></a>
             <a href="#" class="icon"
               ><img
-                src="{{ url_for('static', filename='Img/github-brands-solid.svg') }}"
+                src="../Img/github-brands-solid.svg"
                 alt=""
             /></a>
             <a href="#" class="icon"
               ><img
-                src="{{ url_for('static', filename='Img/linkedin-in-brands-solid.svg') }}"
+                src="../Img/linkedin-in-brands-solid.svg"
                 alt=""
             /></a>
           </div>
@@ -58,33 +58,27 @@
 
       <!-- Sign In Form -->
       <div class="form-container sign-in">
-        <!-- Flash Messages -->
-        {% with messages = get_flashed_messages(with_categories=true) %} {% if
-        messages %} {% for category, message in messages %}
-        <div class="flash-messages flash-{{ category }}">{{ message }}</div>
-        {% endfor %} {% endif %} {% endwith %}
-
         <form action="{{ url_for('login') }}" method="POST">
           <h1>Sign In</h1>
           <div class="social-icons">
             <a href="#" class="icon"
               ><img
-                src="{{ url_for('static', filename='Img/google-brands-solid.svg') }}"
+                src="../Img/google-brands-solid.svg"
                 alt=""
             /></a>
             <a href="#" class="icon"
               ><img
-                src="{{ url_for('static', filename='Img/facebook-f-brands-solid.svg') }}"
+                src="../Img/facebook-f-brands-solid.svg"
                 alt=""
             /></a>
             <a href="#" class="icon"
               ><img
-                src="{{ url_for('static', filename='Img/github-brands-solid.svg') }}"
+                src="../Img/github-brands-solid.svg"
                 alt=""
             /></a>
             <a href="#" class="icon"
               ><img
-                src="{{ url_for('static', filename='Img/linkedin-in-brands-solid.svg') }}"
+                src="../Img/linkedin-in-brands-solid.svg"
                 alt=""
             /></a>
           </div>
@@ -120,6 +114,6 @@
       </div>
     </div>
 
-    <script src="{{ url_for('static', filename='js/login.js') }}"></script>
+    <script src="../js/login.js"></script>
   </body>
 </html>
