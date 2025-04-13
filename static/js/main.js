@@ -1,120 +1,113 @@
-document.addEventListener("DOMContentLoaded", function () {
+// Wait for DOM content to load
+document.addEventListener('DOMContentLoaded', function() {
   // Page loader
-  const loader = document.querySelector('.page-loader');
-  
-  // Hide loader after page loads
-  window.addEventListener('load', function() {
-    setTimeout(function() {
-      loader.classList.add('hidden');
-      // Add animation class to content after loading
-      document.querySelector('.dashboard-container').classList.add('animate__fadeIn');
-    }, 800);
-  });
+  const pageLoader = document.querySelector('.page-loader');
+  if (pageLoader) {
+      setTimeout(() => {
+          pageLoader.style.opacity = '0';
+          setTimeout(() => {
+              pageLoader.style.display = 'none';
+          }, 500);
+      }, 1000);
+  }
 
-  // Theme toggle functionality
-  const themeToggleBtn = document.getElementById('toggle-theme');
+  // Toggle sidebar on mobile
+  const menuToggle = document.querySelector('.menu-toggle');
+  const sidebar = document.querySelector('.sidebar');
+  if (menuToggle && sidebar) {
+      menuToggle.addEventListener('click', () => {
+          sidebar.classList.toggle('active');
+          menuToggle.classList.toggle('active');
+      });
+  }
+
+  // Toggle theme (dark/light mode)
+  const themeToggle = document.getElementById('toggle-theme');
   const body = document.body;
   
-  // Check for saved theme preference or use the default dark mode
-  const savedTheme = localStorage.getItem('theme') || 'dark';
+  if (themeToggle) {
+      themeToggle.addEventListener('click', () => {
+          body.classList.toggle('dark-mode');
+          body.classList.toggle('light-mode');
+          
+          // Save theme preference to localStorage
+          const isDarkMode = body.classList.contains('dark-mode');
+          localStorage.setItem('darkMode', isDarkMode);
+      });
+      
+      // Check for saved theme preference
+      const savedDarkMode = localStorage.getItem('darkMode');
+      if (savedDarkMode !== null) {
+          if (savedDarkMode === 'true') {
+              body.classList.add('dark-mode');
+              body.classList.remove('light-mode');
+          } else {
+              body.classList.add('light-mode');
+              body.classList.remove('dark-mode');
+          }
+      }
+  }
+
+  // Animate elements when they come into view
+  const scrollRevealItems = document.querySelectorAll('.scroll-reveal');
   
-  // Apply the saved theme
-  if (savedTheme === 'dark') {
-    body.classList.add('dark-mode');
-  } else {
-    body.classList.remove('dark-mode');
+  function checkScroll() {
+      scrollRevealItems.forEach(item => {
+          const itemTop = item.getBoundingClientRect().top;
+          const windowHeight = window.innerHeight;
+          
+          if (itemTop < windowHeight - 100) {
+              item.classList.add('revealed');
+          }
+      });
   }
   
-  // Toggle theme when button is clicked
-  themeToggleBtn.addEventListener('click', function() {
-    body.classList.toggle('dark-mode');
-    
-    // Save preference to localStorage
-    if (body.classList.contains('dark-mode')) {
-      localStorage.setItem('theme', 'dark');
-    } else {
-      localStorage.setItem('theme', 'light');
-    }
-  });
+  // Run on initial load
+  checkScroll();
+  
+  // Run on scroll
+  window.addEventListener('scroll', checkScroll);
 
-  // Mobile menu toggle
-  const menuToggle = document.querySelector('.menu-toggle');
-  const navList = document.querySelector('.nav-list');
-  const sidebar = document.querySelector('.sidebar');
-  
-  menuToggle.addEventListener('click', function() {
-    menuToggle.classList.toggle('active');
-    navList.classList.toggle('active');
-    sidebar.classList.toggle('active');
-  });
-
-  // Responsive iframe wrapper
-  const iframes = document.querySelectorAll("iframe");
-  iframes.forEach((iframe) => {
-    // If iframe isn't already wrapped
-    if (!iframe.parentNode.classList.contains('video-wrapper')) {
-      const wrapper = document.createElement("div");
-      wrapper.classList.add("video-wrapper");
-      iframe.parentNode.insertBefore(wrapper, iframe);
-      wrapper.appendChild(iframe);
-    }
-  });
-
-  // Scroll animations
-  const scrollElements = document.querySelectorAll('.scroll-reveal');
-  
-  const elementInView = (el, percentageScroll = 100) => {
-    const elementTop = el.getBoundingClientRect().top;
-    return (
-      elementTop <= 
-      ((window.innerHeight || document.documentElement.clientHeight) * (percentageScroll/100))
-    );
-  };
-  
-  const displayScrollElement = (element) => {
-    element.classList.add('active');
-  };
-  
-  const hideScrollElement = (element) => {
-    element.classList.remove('active');
-  };
-  
-  const handleScrollAnimation = () => {
-    scrollElements.forEach((el) => {
-      if (elementInView(el, 85)) {
-        displayScrollElement(el);
-      } else {
-        hideScrollElement(el);
-      }
-    });
-  };
-  
-  // Initialize elements that are already in view on page load
-  handleScrollAnimation();
-  
-  // Add scroll event listener
-  window.addEventListener('scroll', () => {
-    handleScrollAnimation();
-  });
-  
-  // Add animation when content is updated
-  const addContentAnimations = () => {
-    const contentSections = document.querySelectorAll('.roadmap-content h2, .roadmap-content h3');
-    contentSections.forEach((section, index) => {
-      section.style.opacity = '0';
-      section.style.transform = 'translateY(20px)';
-      section.style.transition = 'opacity 0.5s ease, transform 0.5s ease';
-      section.style.transitionDelay = `${index * 0.1}s`;
-      
-      setTimeout(() => {
-        section.style.opacity = '1';
-        section.style.transform = 'translateY(0)';
-      }, 100);
-    });
-  };
-  
-  // Run content animations
-  addContentAnimations();
-  
-  console.log("Dashboard loaded successfully with animations");
+  // Quiz generation functionality
+  const generateQuizButton = document.getElementById('generate-quiz');
+  if (generateQuizButton) {
+      generateQuizButton.addEventListener('click', function() {
+          // Get the subject from the roadmap title
+          const subject = document.querySelector('.saved-roadmap h2').textContent;
+          
+          // Show loading state
+          generateQuizButton.textContent = 'Generating Quiz...';
+          generateQuizButton.disabled = true;
+          
+          // Send request to generate quiz
+          fetch('/generate-quiz', {
+              method: 'POST',
+              headers: {
+                  'Content-Type': 'application/json',
+              },
+              body: JSON.stringify({ subject: subject })
+          })
+          .then(response => response.json())
+          .then(data => {
+              if (data.error) {
+                  alert('Error generating quiz: ' + data.error);
+                  generateQuizButton.textContent = 'Generate Quiz';
+                  generateQuizButton.disabled = false;
+              } else {
+                  // Store quiz data in localStorage for the quiz page to use
+                  localStorage.setItem('quizData', JSON.stringify(data.quiz));
+                  localStorage.setItem('quizSubject', subject);
+                  
+                  // Redirect to the quiz page
+                  window.location.href = '/quiz?subject=' + encodeURIComponent(subject);
+              }
+          })
+          .catch(error => {
+              console.error('Error:', error);
+              alert('Failed to generate quiz. Please try again.');
+              generateQuizButton.textContent = 'Generate Quiz';
+              generateQuizButton.disabled = false;
+          });
+      });
+  }
 });

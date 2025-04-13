@@ -21,6 +21,7 @@ import requests
 import re
 import sqlite3
 import urllib.parse
+import functools
 
 # Create the templates directory if it doesn't exist
 templates_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), "templates")
@@ -45,10 +46,10 @@ if not yt_api_key:
     raise ValueError("YT_API_KEY not found in .env file")
 
 # Define the prompt template with more explicit instructions for JSON format
-PROMPT_TEMPLATE =  """ 
+PROMPT_TEMPLATE = """ 
 Subject: {text_content}
-
 You are an expert in generating roadmaps for {text_content}. 
+Create a comprehensive roadmap for learning {text_content} from zero prior knowledge, aiming to reach an intermediate level of proficiency suitable for practical use (e.g., building basic projects, understanding core concepts, applying skills creatively). Include the following: 
 Create a comprehensive roadmap for learning {text_content} from zero prior knowledge, aiming to reach an intermediate level of proficiency suitable for practical use.
 
 YOUR RESPONSE MUST BE A VALID JSON LIST OF OBJECTS with the following schema:
@@ -90,14 +91,136 @@ Include the following in your roadmap:
 - Curated, beginner-accessible resources (tutorials, books, videos) for each task
 - A final mini-project or demonstration of skill with clear completion criteria
 
-DO NOT INCLUDE ANY EXPLANATORY TEXT - RETURN ONLY THE JSON ARRAY.
+ 
+- Monthly milestones with specific, beginner-friendly outcomes (e.g., 'Write a simple script,' 'Explain Newton’s laws').  
+- Detailed tasks per month, including foundational learning, hands-on practice, and small projects, with estimated time commitments (assume 10-15 hours/week).  
+- Introduction of key concepts, tools, or techniques gradually, building from basics to intermediate topics (e.g., variables to functions in coding, lines to composition in art).  
+- Curated, beginner-accessible resources (e.g., free tutorials, introductory books, videos) emphasizing clarity and engagement.  
+- Common beginner challenges (e.g., information overload, lack of confidence) and practical mitigation strategies (e.g., spaced repetition, community support).  
+- A final mini-project or demonstration of skill (e.g., a portfolio piece, a solved problem set) with clear completion criteria. 
+
+GIVE ROADMAP IN LIST OF DICTIONRIES FORMAT.
+DO NOT INCLUDE ANY OTHER TEXT OR EXPLANATION.
 """
 
-# Create the PromptTemplate
+
+# Quiz template for generating MCQ questions
+QUIZ_TEMPLATE = """
+Subject: {text_content}
+You are an expert in generating MCQ type quiz on the basis of subject. 
+Given the above text, create a quiz of 10 multiple choice questions keeping difficulty level mixed some easy some moderate some hard. 
+Make sure the questions are not repeated and check all the questions to be conforming the text as well.
+Make sure to format your response like RESPONSE_JSON below and use it as a guide.
+Ensure to make an array of 3 MCQs referring to the following response json. IT SHOULD BE IN STRING FORMAT.
+Here is the RESPONSE_JSON: 
+
+{response_json}
+"""
+
+# Response JSON template for quiz
+response_json = {
+    "mcqs": [
+        {
+            "mcq": "multiple choice question1",
+            "options": {
+                "a": "choice here1",
+                "b": "choice here2",
+                "c": "choice here3",
+                "d": "choice here4",
+            },
+            "correct": "a",
+            "topic": "topic here",
+            "difficulty": "difficulty here",
+            "explanation": "explanation here for the correct answer",
+        },
+        {
+            "mcq": "multiple choice question1",
+            "options": {
+                "a": "choice here1",
+                "b": "choice here2",
+                "c": "choice here3",
+                "d": "choice here4",
+            },
+            "correct": "a",
+            "topic": "topic here",
+            "difficulty": "difficulty here",
+            "explanation": "explanation here for the correct answer",
+        },
+        {
+            "mcq": "multiple choice question1",
+            "options": {
+                "a": "choice here1",
+                "b": "choice here2",
+                "c": "choice here3",
+                "d": "choice here4",
+            },
+            "correct": "a",
+            "topic": "topic here",
+            "difficulty": "difficulty here",
+            "explanation": "explanation here for the correct answer",
+        },
+    ]
+}
+
+# Create the PromptTemplate for both roadmap and quiz
 prompt = PromptTemplate(
     template=PROMPT_TEMPLATE,
     input_variables=["text_content"],
 )
+
+quiz_prompt = PromptTemplate(
+    template=QUIZ_TEMPLATE,
+    input_variables=["text_content", "response_json"],
+)
+
+
+def escape_json_string(json_string):
+    """Escape problematic characters in a JSON string."""
+    return (
+        json_string.replace("\\", "\\\\")
+        .replace('"', '\\"')
+        .replace("\n", "\\n")
+        .replace("\t", "\\t")
+    )
+
+
+def generate_quiz(text_content):
+    """Generate a quiz based on the given subject"""
+    llm = ChatGoogleGenerativeAI(
+        model="gemini-1.5-pro",
+        temperature=0,
+        max_tokens=None,
+        timeout=None,
+        max_retries=2,
+    )
+
+    # Escape the response_json before passing it to the prompt
+    escaped_response_json = escape_json_string(json.dumps(response_json, indent=2))
+
+    # Create the LLMChain with the formatted prompt
+    name_chain = LLMChain(llm=llm, prompt=quiz_prompt)
+
+    # Use invoke() to get the response
+    try:
+        response = name_chain.invoke(
+            {
+                "text_content": text_content,
+                "response_json": escaped_response_json,
+            }
+        )
+
+        # Clean and parse the response
+        json_str = response["text"].strip("```json\n").strip("```")
+        json_str = json_str.replace("\n", "").replace("\r", "")  # Remove newlines
+        extracted_response = json.loads(json_str)
+
+        return extracted_response
+    except json.JSONDecodeError as e:
+        print(f"JSON decoding error: {str(e)}")
+        return {"error": f"Invalid JSON response: {str(e)}"}
+    except Exception as e:
+        print(f"Error generating quiz: {str(e)}")
+        return {"error": f"Error generating quiz: {str(e)}"}
 
 
 # Function to generate roadmap
@@ -184,141 +307,191 @@ def search_youtube_videos(query, max_results=5):
     """
     Search YouTube for videos matching the query without using the API.
     Returns a list of videos with title, video ID, and embed code.
-    
     Args:
         query (str): The search query
         max_results (int): Maximum number of results to return
-        
     Returns:
         list: List of dictionaries containing video information
     """
     query = urllib.parse.quote(query)
     url = f"https://www.youtube.com/results?search_query={query}"
-    
+
     headers = {
         "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36",
         "Accept-Language": "en-US,en;q=0.9",
     }
-    
+
     try:
         response = requests.get(url, headers=headers)
         response.raise_for_status()
-        
+
         # Extract initial data JSON from the page
-        initial_data_pattern = r'var ytInitialData = (.+?);</script>'
+        initial_data_pattern = r"var ytInitialData = (.+?);</script>"
         matches = re.search(initial_data_pattern, response.text)
-        
+
         if not matches:
             return []
-            
+
         json_str = matches.group(1)
         data = json.loads(json_str)
-        
+
         videos = []
-        
+
         # Navigate through the nested JSON structure to find video results
-        contents = data.get('contents', {}).get('twoColumnSearchResultsRenderer', {}).get('primaryContents', {}).get('sectionListRenderer', {}).get('contents', [{}])[0].get('itemSectionRenderer', {}).get('contents', [])
-        
+        contents = (
+            data.get("contents", {})
+            .get("twoColumnSearchResultsRenderer", {})
+            .get("primaryContents", {})
+            .get("sectionListRenderer", {})
+            .get("contents", [{}])[0]
+            .get("itemSectionRenderer", {})
+            .get("contents", [])
+        )
+
         for item in contents:
-            video_renderer = item.get('videoRenderer')
+            video_renderer = item.get("videoRenderer")
             if not video_renderer:
                 continue
-                
-            video_id = video_renderer.get('videoId')
+
+            video_id = video_renderer.get("videoId")
             if not video_id:
                 continue
-                
+
             # Get video title
-            title_runs = video_renderer.get('title', {}).get('runs', [])
-            title = ''.join([run.get('text', '') for run in title_runs])
-            
+            title_runs = video_renderer.get("title", {}).get("runs", [])
+            title = "".join([run.get("text", "") for run in title_runs])
+
             # Create embed code
             embed_code = f'<iframe width="560" height="315" src="https://www.youtube.com/embed/{video_id}" frameborder="0" allowfullscreen></iframe>'
-            
+
             # Get thumbnail URL
             thumbnail = f"https://i.ytimg.com/vi/{video_id}/hqdefault.jpg"
-            
-            videos.append({
-                'video_id': video_id,
-                'title': title,
-                'embed_code': embed_code,
-                'thumbnail': thumbnail,
-                'watch_url': f"https://www.youtube.com/watch?v={video_id}"
-            })
-            
+
+            videos.append(
+                {
+                    "video_id": video_id,
+                    "title": title,
+                    "embed_code": embed_code,
+                    "thumbnail": thumbnail,
+                    "watch_url": f"https://www.youtube.com/watch?v={video_id}",
+                }
+            )
+
             if len(videos) >= max_results:
                 break
-                
+
         return videos
-    
+
     except Exception as e:
         print(f"Error searching YouTube: {str(e)}")
         return []
 
+
 def get_video_details(video_id):
     """
     Get detailed information about a specific YouTube video.
-    
+
     Args:
         video_id (str): YouTube video ID
-        
+
     Returns:
         dict: Video details including title, description, etc.
     """
     url = f"https://www.youtube.com/watch?v={video_id}"
-    
+
     headers = {
         "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36",
         "Accept-Language": "en-US,en;q=0.9",
     }
-    
+
     try:
         response = requests.get(url, headers=headers)
         response.raise_for_status()
-        
-        # Extract video details JSON
-        player_response_pattern = r'var ytInitialPlayerResponse = (.+?);</script>'
+
+        # Extract ytInitialPlayerResponse using a more precise regex
+        player_response_pattern = (
+            r"ytInitialPlayerResponse\s*=\s*({[^}]*(?:}[^}]*)*})\s*;"
+        )
         matches = re.search(player_response_pattern, response.text)
-        
+
         if not matches:
+            print("Could not find ytInitialPlayerResponse in the page")
             return None
-            
-        json_str = matches.group(1)
-        data = json.loads(json_str)
-        
-        video_details = data.get('videoDetails', {})
-        
-        # Get video metadata
-        title = video_details.get('title', '')
-        description = video_details.get('shortDescription', '')
-        channel_name = video_details.get('author', '')
-        
-        # Create embed code
-        embed_code = f'<iframe width="560" height="315" src="https://www.youtube.com/embed/{video_id}" frameborder="0" allowfullscreen></iframe>'
-        
-        return {
-            'video_id': video_id,
-            'title': title,
-            'description': description,
-            'channel_name': channel_name,
-            'embed_code': embed_code,
-            'watch_url': url,
-            'thumbnail': f"https://i.ytimg.com/vi/{video_id}/hqdefault.jpg"
-        }
-        
-    except Exception as e:
-        print(f"Error getting video details: {str(e)}")
+
+        try:
+            # Clean the JSON string before parsing
+            json_str = matches.group(1)
+            # Remove any trailing characters that might interfere with JSON parsing
+            json_str = re.sub(r"\s*;.*$", "", json_str)
+            # Handle potential line breaks and escape sequences
+            json_str = json_str.replace("\n", "").replace("\r", "")
+
+            # Try to find the actual end of the JSON object
+            brace_count = 0
+            clean_json = ""
+            for char in json_str:
+                if char == "{":
+                    brace_count += 1
+                elif char == "}":
+                    brace_count -= 1
+                clean_json += char
+                if brace_count == 0:
+                    break
+
+            data = json.loads(clean_json)
+
+            # Extract video details
+            video_details = data.get("videoDetails", {})
+            microformat = data.get("microformat", {}).get(
+                "playerMicroformatRenderer", {}
+            )
+
+            length_seconds = video_details.get("lengthSeconds", "0")
+            try:
+                length_seconds = int(length_seconds)
+            except (ValueError, TypeError):
+                length_seconds = 0
+
+            return {
+                "video_id": video_id,
+                "title": video_details.get("title", ""),
+                "description": video_details.get("shortDescription", ""),
+                "channel_name": video_details.get("author", ""),
+                "lengthSeconds": length_seconds,
+                "embed_code": f'<iframe width="560" height="315" src="https://www.youtube.com/embed/{video_id}" frameborder="0" allowfullscreen></iframe>',
+                "watch_url": url,
+                "thumbnail": f"https://i.ytimg.com/vi/{video_id}/hqdefault.jpg",
+                "publishDate": microformat.get("publishDate", ""),
+                "uploadDate": microformat.get("uploadDate", ""),
+            }
+
+        except json.JSONDecodeError as json_error:
+            print(f"JSON parsing error in clean_json: {str(json_error)}")
+            print(
+                f"Problematic JSON string: {clean_json[:100]}..."
+            )  # Print first 100 chars for debugging
+            return None
+        except Exception as e:
+            print(f"Error processing video details: {str(e)}")
+            return None
+
+    except requests.RequestException as e:
+        print(f"Error fetching video page: {str(e)}")
         return None
+    except Exception as e:
+        print(f"Unexpected error in get_video_details: {str(e)}")
+        return None
+
 
 def fetch_youtube_video(query, subject=None):
     """
     Fetches a YouTube video based on a search query and returns an embeddable iframe.
-    Now includes the subject in search to ensure relevance.
-    
+    Now includes the subject in search to ensure relevance and checks for video duration.
+
     Args:
         query (str): The search query
         subject (str): The main subject of the roadmap
-        
+
     Returns:
         dict: Dictionary with video_id, title, and embed_code
     """
@@ -329,26 +502,39 @@ def fetch_youtube_video(query, subject=None):
             # Make sure subject is actually in the query
             if subject.lower() not in query.lower():
                 search_term = f"{subject} {query}"
-                
+
         # Search for videos based on the enhanced query
-        results = search_youtube_videos(f"{search_term} tutorial", max_results=1)
-        
-        if results and len(results) > 0:
-            # Return the first result
-            return results[0]
+        results = search_youtube_videos(f"{search_term} tutorial long", max_results=5)
+
+        # Filter for videos longer than 15 minutes
+        suitable_video = None
+        for video in results:
+            video_details = get_video_details(video["video_id"])
+            if video_details:
+                try:
+                    duration = int(video_details.get("lengthSeconds", 0))
+                    if duration > 400:  # 15 minutes = 900 seconds
+                        suitable_video = video
+                        break
+                except (ValueError, TypeError):
+                    continue
+
+        if suitable_video:
+            return suitable_video
         else:
             return {
                 "video_id": None,
-                "title": "No video found",
-                "embed_code": "No video found for this query."
+                "title": "No suitable video found",
+                "embed_code": "No video found for this query.",
             }
-            
+
     except Exception as e:
         return {
             "video_id": None,
             "title": f"Error: {str(e)}",
-            "embed_code": f"Error fetching video: {str(e)}"
+            "embed_code": f"Error fetching video: {str(e)}",
         }
+
 
 def generate_fallback_roadmap(subject):
     """
@@ -375,6 +561,7 @@ def generate_fallback_roadmap(subject):
 *Note: This is a basic template. The AI-generated detailed roadmap could not be created. Please try again or modify your query.*
     """
     return fallback_roadmap
+
 
 def format_roadmap_with_videos(roadmap_data, subject=None):
     """
@@ -403,7 +590,9 @@ def format_roadmap_with_videos(roadmap_data, subject=None):
                 formatted_roadmap += f"### {task['task']}\n"
 
                 if "estimated_time" in task:
-                    formatted_roadmap += f"- **Estimated Time:** {task['estimated_time']}\n"
+                    formatted_roadmap += (
+                        f"- **Estimated Time:** {task['estimated_time']}\n"
+                    )
 
                 if "resources" in task:
                     formatted_roadmap += f"- **Resources:** {task['resources']}\n"
@@ -412,7 +601,9 @@ def format_roadmap_with_videos(roadmap_data, subject=None):
                 if video["video_id"]:
                     formatted_roadmap += f"\n**Tutorial Video:** {video['title']}\n\n"
                     # Use HTML directly instead of relying on Markdown conversion for iframes
-                    formatted_roadmap += f"<div class='video-container'>{video['embed_code']}</div>\n\n"
+                    formatted_roadmap += (
+                        f"<div class='video-container'>{video['embed_code']}</div>\n\n"
+                    )
                 else:
                     formatted_roadmap += "\n*No tutorial video found*\n\n"
     except (KeyError, TypeError) as e:
@@ -421,6 +612,7 @@ def format_roadmap_with_videos(roadmap_data, subject=None):
         return generate_fallback_roadmap(subject)
 
     return formatted_roadmap
+
 
 def enhance_roadmap_with_videos(roadmap_data, subject=None):
     """
@@ -451,15 +643,19 @@ def enhance_roadmap_with_videos(roadmap_data, subject=None):
         markdown_version = generate_fallback_roadmap("the requested subject")
         return error_msg, markdown_version
 
+
 # Custom function to convert markdown to HTML
 def md_to_html(text):
     try:
         # Convert markdown to HTML, but allow raw HTML to pass through
-        return Markup(markdown.markdown(text, extensions=["tables", "fenced_code", "extra"]))
+        return Markup(
+            markdown.markdown(text, extensions=["tables", "fenced_code", "extra"])
+        )
     except Exception as e:
         # Fall back to preformatted text if there's any issue
         return Markup(f"<pre>{text}</pre>")
-    
+
+
 def init_db():
     conn = sqlite3.connect("instance/roadmaps.db")
     cursor = conn.cursor()
@@ -483,8 +679,183 @@ def init_db():
     print("Database initialized successfully!")
 
 
+def init_user_db():
+    """Initialize the users database table"""
+    conn = sqlite3.connect("instance/roadmaps.db")
+    cursor = conn.cursor()
+
+    # Create table for storing users
+    cursor.execute(
+        """
+    CREATE TABLE IF NOT EXISTS users (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        name TEXT NOT NULL,
+        email TEXT UNIQUE NOT NULL,
+        password TEXT NOT NULL,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    )
+    """
+    )
+
+    conn.commit()
+    conn.close()
+
+    print("User database initialized successfully!")
+
+
 # Register filter with Jinja
+
+
+def hash_password(password):
+    """Hash the password for secure storage"""
+    # In a production app, you'd use a library like bcrypt
+    # This is a simple hashing for demonstration
+    import hashlib
+
+    return hashlib.sha256(password.encode()).hexdigest()
+
+
+def register_user(name, email, password):
+    """Register a new user in the database"""
+    conn = sqlite3.connect("instance/roadmaps.db")
+    cursor = conn.cursor()
+
+    try:
+        # Hash the password before storing
+        hashed_password = hash_password(password)
+
+        # Insert the user into the database
+        cursor.execute(
+            "INSERT INTO users (name, email, password) VALUES (?, ?, ?)",
+            (name, email, hashed_password),
+        )
+
+        conn.commit()
+        user_id = cursor.lastrowid
+        return user_id
+    except sqlite3.IntegrityError:
+        # Email already exists
+        return None
+    finally:
+        conn.close()
+
+
+def authenticate_user(email, password):
+    """Authenticate a user by email and password"""
+    conn = sqlite3.connect("instance/roadmaps.db")
+    conn.row_factory = sqlite3.Row
+    cursor = conn.cursor()
+
+    # Hash the provided password
+    hashed_password = hash_password(password)
+
+    # Find the user by email and password
+    cursor.execute(
+        "SELECT id, name, email FROM users WHERE email = ? AND password = ?",
+        (email, hashed_password),
+    )
+
+    user = cursor.fetchone()
+    conn.close()
+
+    return dict(user) if user else None
+
+
+# Add to the existing init_db function or call separately
+def initialize_databases():
+    """Initialize all database tables"""
+    try:
+        # Make sure the instance directory exists
+        if not os.path.exists("instance"):
+            os.makedirs("instance")
+
+        init_db()  # Initialize roadmaps table
+        init_user_db()  # Initialize users table
+        print("Databases initialized successfully")
+    except Exception as e:
+        print(f"Error initializing databases: {str(e)}")
+
+
+def login_required(route_function):
+    """Decorator to require login for certain routes"""
+
+    @functools.wraps(route_function)
+    def decorated_function(*args, **kwargs):
+        if "user_id" not in session:
+            # User is not logged in, redirect to login page
+            return redirect(url_for("login", next=request.url))
+        return route_function(*args, **kwargs)
+
+    return decorated_function
+
+
 app.jinja_env.filters["md_to_html"] = md_to_html
+
+
+# Add these routes to handle login and registration
+@app.route("/login", methods=["GET", "POST"])
+def login():
+    print(f"Login route called with method: {request.method}")
+    if request.method == "POST":
+        email = request.form.get("email")
+        password = request.form.get("password")
+
+        if not email or not password:
+            return render_template(
+                "login.html", error="Please provide both email and password"
+            )
+
+        user = authenticate_user(email, password)
+
+        if user:
+            # Set user session
+            session["user_id"] = user["id"]
+            session["user_name"] = user["name"]
+            session["user_email"] = user["email"]
+
+            # Redirect to dashboard or home page
+            return redirect(url_for("dashboard"))
+        else:
+            return render_template("login.html", error="Invalid email or password")
+
+    # GET request - show the login form
+    return render_template("login.html")
+
+
+@app.route("/register", methods=["GET", "POST"])
+def register():
+    print(f"Register route called with method: {request.method}")
+    if request.method == "POST":
+        name = request.form.get("name")
+        email = request.form.get("email")
+        password = request.form.get("password")
+
+        if not name or not email or not password:
+            return render_template("login.html", reg_error="Please fill all fields")
+
+        # Register the user
+        user_id = register_user(name, email, password)
+
+        if user_id:
+            # Set user session
+            session["user_id"] = user_id
+            session["user_name"] = name
+            session["user_email"] = email
+
+            # Redirect to dashboard
+            return redirect(url_for("dashboard"))
+        else:
+            return render_template("login.html", reg_error="Email already exists")
+
+    # GET request - redirect to login page which has registration form
+    return redirect(url_for("login"))
+
+
+@app.route("/logout")
+def logout():
+    # Clear the user session
+    session.clear()
+    return redirect(url_for("login"))
 
 
 # Route for the results page
@@ -509,7 +880,9 @@ def results():
                     roadmap = generate_fallback_roadmap(text_content)
                 else:
                     # Enhance roadmap with videos and pass the subject
-                    _, roadmap = enhance_roadmap_with_videos(roadmap_data, subject=text_content)
+                    _, roadmap = enhance_roadmap_with_videos(
+                        roadmap_data, subject=text_content
+                    )
             except Exception as e:
                 error = f"Application error: {str(e)}"
                 roadmap = generate_fallback_roadmap(text_content)
@@ -541,8 +914,44 @@ def results():
 # Main route for the landing page
 @app.route("/", methods=["GET"])
 def main():
-    # Serve main.html from the directory
-    return send_from_directory(os.path.dirname(__file__), "index.html")
+    # Get user info from session if logged in
+    user = None
+    if "user_id" in session:
+        user = {
+            "id": session.get("user_id"),
+            "name": session.get("user_name"),
+            "email": session.get("user_email"),
+        }
+
+    return render_template("index.html", user=user)
+
+
+@app.route("/root")
+def root():
+    if "user_id" in session:
+        return redirect(url_for("dashboard"))
+    else:
+        return render_template("login.html")
+
+
+def index():
+    if "user_id" in session:
+        return redirect(url_for("dashboard"))
+    else:
+        return redirect(url_for("login.html"))
+
+
+@app.route("/login-page", methods=["GET"])
+def login_page():
+    return render_template("login.html")
+
+
+@app.route("/main")
+def main_page():
+    if "user_id" in session:
+        return redirect(url_for("dashboard"))
+    else:
+        return redirect(url_for("login"))
 
 
 # API endpoint to handle the search
@@ -561,7 +970,8 @@ def search():
 # Route to handle the form submission
 @app.route("/generate", methods=["POST"])
 def generate_from_main():
-    query = request.form.get("promptInput")
+    query = request.form.get("promptInput")  # Changed from text_content to promptInput
+    is_regeneration = request.form.get("regenerate") == "true"
 
     if not query:
         return redirect("/")
@@ -581,7 +991,7 @@ def generate_from_main():
         error = f"Application error: {str(e)}"
         roadmap = generate_fallback_roadmap(query)
 
-    return render_template("index.html", roadmap=roadmap, error=error, subject=query)
+    return render_template("generate.html", roadmap=roadmap, error=error, subject=query)
 
 
 # API endpoint for roadmap JSON with videos
@@ -629,6 +1039,7 @@ def health_check():
 
 
 @app.route("/save-roadmap", methods=["POST"])
+@login_required
 def save_roadmap():
     subject = request.form.get("subject")
     roadmap = request.form.get("roadmap")
@@ -637,20 +1048,17 @@ def save_roadmap():
         return redirect(url_for("results"))
 
     # Store the roadmap ID in session for redirect purposes
-    roadmap_id = save_roadmap_to_db(subject, roadmap)
+    roadmap_id = save_roadmap_to_db(subject, roadmap, session.get("user_id"))
     session["current_roadmap_id"] = roadmap_id
 
     # Redirect to the dashboard
     return redirect(url_for("dashboard"))
 
 
-def save_roadmap_to_db(subject, content):
+def save_roadmap_to_db(subject, content, user_id="anonymous"):
     """Save roadmap to database and return the ID"""
     conn = sqlite3.connect("instance/roadmaps.db")
     cursor = conn.cursor()
-
-    # Get user_id from session or use 'anonymous'
-    user_id = session.get("user_id", "anonymous")
 
     # Insert the roadmap into the database
     cursor.execute(
@@ -699,8 +1107,17 @@ def get_all_roadmaps_for_user(user_id):
 @app.route("/dashboard", methods=["GET"])
 def dashboard():
     """Dashboard view showing the user's saved roadmaps"""
-    # Get user_id from session or use 'anonymous'
-    user_id = session.get("user_id", "anonymous")
+    # Check if user is logged in
+    if "user_id" not in session:
+        return redirect(url_for("login"))
+
+    # Get user_id and user info from session
+    user_id = session.get("user_id")
+    user = {
+        "id": user_id,
+        "name": session.get("user_name"),
+        "email": session.get("user_email"),
+    }
 
     # Get all roadmaps for the user
     roadmaps = get_all_roadmaps_for_user(user_id)
@@ -732,15 +1149,55 @@ def dashboard():
                 "created_at": row["created_at"],
             }
 
-    # Render the dashboard template
-    return render_template("main.html", roadmaps=roadmaps, roadmap=current_roadmap)
+    # Render the dashboard template with user info
+    return render_template(
+        "main.html", roadmaps=roadmaps, roadmap=current_roadmap, user=user
+    )
+
+
+@app.route("/quiz")
+def quiz_page():
+    """Render the quiz page"""
+    current_roadmap_id = session.get("current_roadmap_id")
+
+    # If there's a specific roadmap to display
+    subject = None
+    if current_roadmap_id:
+        # Get the specific roadmap
+        conn = sqlite3.connect("instance/roadmaps.db")
+        conn.row_factory = sqlite3.Row
+        cursor = conn.cursor()
+
+        cursor.execute(
+            "SELECT id, subject, content, created_at FROM roadmaps WHERE id = ?",
+            (current_roadmap_id,),
+        )
+
+        row = cursor.fetchone()
+        conn.close()
+
+        if row:
+            subject = row["subject"]
+        else:
+            # If roadmap doesn't exist, redirect to dashboard
+            return redirect(url_for("dashboard"))
+    print(f"Quiz page called with subject: {subject}")
+    return render_template("quiz.html", subject=subject)
 
 
 @app.route("/view-roadmap/<int:roadmap_id>", methods=["GET"])
 def view_roadmap(roadmap_id):
     """View a specific roadmap"""
-    # Get user_id from session or use 'anonymous'
-    user_id = session.get("user_id", "anonymous")
+    # Get user info from session
+    user_id = session.get("user_id")
+    if not user_id:
+        return redirect(url_for("login"))
+
+    user = {
+        "id": user_id,
+        "name": session.get("user_name"),
+        "email": session.get("user_email"),
+    }
 
     # Get all roadmaps for the user
     roadmaps = get_all_roadmaps_for_user(user_id)
@@ -758,6 +1215,8 @@ def view_roadmap(roadmap_id):
     row = cursor.fetchone()
     conn.close()
 
+    print({row["subject"]})
+
     # If roadmap exists, render it
     if row:
         current_roadmap = {
@@ -768,7 +1227,9 @@ def view_roadmap(roadmap_id):
         }
         # Store the current roadmap ID in the session
         session["current_roadmap_id"] = roadmap_id
-        return render_template("main.html", roadmaps=roadmaps, roadmap=current_roadmap)
+        return render_template(
+            "main.html", roadmaps=roadmaps, roadmap=current_roadmap, user=user
+        )
     else:
         # If roadmap doesn't exist, redirect to dashboard
         return redirect(url_for("dashboard"))
@@ -787,8 +1248,94 @@ def get_local_ip():
         return "127.0.0.1"  # Fallback to localhost
 
 
+@app.route("/generate-quiz", methods=["POST"])
+def generate_quiz_route():
+    """Handle quiz generation requests"""
+    current_roadmap_id = session.get("current_roadmap_id")
+
+    # If there's a specific roadmap to display
+    subject = None
+    if current_roadmap_id:
+        # Get the specific roadmap
+        conn = sqlite3.connect("instance/roadmaps.db")
+        conn.row_factory = sqlite3.Row
+        cursor = conn.cursor()
+
+        cursor.execute(
+            "SELECT id, subject, content, created_at FROM roadmaps WHERE id = ?",
+            (current_roadmap_id,),
+        )
+
+        row = cursor.fetchone()
+        conn.close()
+
+        if row:
+            subject = row["subject"]
+    print(f"Quiz generation called with subject: {subject}")
+    print()
+    try:
+        # Generate the quiz using the existing function
+        quiz_data = generate_quiz(subject)
+
+        # Ensure we have a valid response structure
+        if not quiz_data or "mcqs" not in quiz_data or not quiz_data["mcqs"]:
+            # Create a fallback quiz if the API returned empty or invalid data
+            quiz_data = {
+                "mcqs": [
+                    {
+                        "mcq": f"Sample question about {subject}?",
+                        "options": {
+                            "a": "First option",
+                            "b": "Second option",
+                            "c": "Third option",
+                            "d": "Fourth option",
+                        },
+                        "correct": "a",
+                        "topic": subject,
+                        "difficulty": "Easy",
+                        "explanation": "This is a sample explanation for the correct answer.",
+                    }
+                ]
+            }
+            return jsonify({"quiz": quiz_data, "warning": "Generated fallback quiz"})
+
+        return jsonify({"quiz": quiz_data})
+    except Exception as e:
+        print(f"Error in quiz generation: {str(e)}")
+        return jsonify({"error": f"Error generating quiz: {str(e)}"}), 500
+
+
+@app.route("/take-quiz/<subject>")
+def take_quiz(subject):
+    current_roadmap_id = session.get("current_roadmap_id")
+
+    # If there's a specific roadmap to display
+    subject = None
+    if current_roadmap_id:
+        # Get the specific roadmap
+        conn = sqlite3.connect("instance/roadmaps.db")
+        conn.row_factory = sqlite3.Row
+        cursor = conn.cursor()
+
+        cursor.execute(
+            "SELECT id, subject, content, created_at FROM roadmaps WHERE id = ?",
+            (current_roadmap_id,),
+        )
+
+        row = cursor.fetchone()
+        conn.close()
+
+        if row:
+            subject = row["subject"]
+    """Render the quiz page for a specific subject"""
+    return render_template("quiz.html", subject=subject)
+
+
 # Run the Flask app
 if __name__ == "__main__":
+    # Initialize all databases first
+    initialize_databases()
+
     # Move the templates to the right location
     current_dir = os.path.dirname(os.path.abspath(__file__))
 
@@ -796,13 +1343,6 @@ if __name__ == "__main__":
     templates_dir = os.path.join(current_dir, "templates")
     if not os.path.exists(templates_dir):
         os.makedirs(templates_dir)
-
-    # Ensure index.html is in the templates directory
-    index_source = os.path.join(current_dir, "index.html")
-    index_dest = os.path.join(templates_dir, "index.html")
-    if os.path.exists(index_source) and not os.path.exists(index_dest):
-        import shutil
-        shutil.copy(index_source, index_dest)
 
     # Create static directory for CSS, JS, and images
     static_dir = os.path.join(current_dir, "static")
@@ -819,10 +1359,11 @@ if __name__ == "__main__":
     main_dest = os.path.join(templates_dir, "main.html")
     if os.path.exists(main_source) and not os.path.exists(main_dest):
         import shutil
+
         shutil.copy(main_source, main_dest)
-    
+
     init_db()
-    
+
     # Get the local IP address
     local_ip = get_local_ip()
     port = 5000

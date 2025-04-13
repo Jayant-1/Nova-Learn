@@ -1,7 +1,10 @@
+@import url("https://fonts.googleapis.com/css2?family=Fredericka+the+Great&display=swap");
+
 body {
   font-family: "Exo 2", sans-serif;
   margin: 0;
   padding: 0;
+  overflow-x: hidden;
 }
 header nav {
   display: flex;
@@ -62,9 +65,10 @@ nav .nav-list {
   font-size: 1.6rem;
   font-weight: 600;
   cursor: pointer;
-  transition: background-color 0.3s ease;
+  transition: transform 0.3s ease, background-color 0.3s ease, color 0.3s ease;
 }
 #btn-sign:hover {
+  padding: 0.5rem 1.5rem;
   border: 2px solid #fff;
   background-color: #000000;
   color: #fff;
@@ -338,4 +342,27 @@ h1::after {
   justify-content: center;
   align-items: center;
   margin: 0 auto;
+}
+
+.profile-circle {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  background-color: #4a90e2;
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: "Fredericka the Great", serif;
+  font-weight: 400;
+  font-size: 2.25rem;
+
+  font-style: normal;
+  cursor: pointer;
+  transition: transform 0.3s ease, background-color 0.3s ease;
+}
+
+.profile-circle:hover {
+  transform: scale(1.1);
+  background-color: #357abd;
 }

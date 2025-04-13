@@ -4,10 +4,11 @@
     <meta charset="UTF-8" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Nova-Learn</title>
+    <title>Nova-Learn - Login</title>
+    <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='Img/logo-2.png') }}" />
     <link
       rel="stylesheet"
-      href="../css/login.css"
+      href="{{ url_for('static', filename='css/login.css') }}"
     />
     <link
       href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css"
@@ -19,31 +20,34 @@
     <div class="container" id="container">
       <!-- Sign Up Form -->
       <div class="form-container sign-up">
-        <form action="" method="POST">
+        <form action="/register" method="POST">
           <h1>Create Account</h1>
           <div class="social-icons">
             <a href="#" class="icon"
               ><img
-                src="../Img/google-brands-solid.svg"
+                src="{{ url_for('static', filename='Img/google-brands-solid.svg') }}"
                 alt=""
             /></a>
             <a href="#" class="icon"
               ><img
-                src="../Img/facebook-f-brands-solid.svg"
+                src="{{ url_for('static', filename='Img/facebook-f-brands-solid.svg') }}"
                 alt=""
             /></a>
             <a href="#" class="icon"
               ><img
-                src="../Img/github-brands-solid.svg"
+                src="{{ url_for('static', filename='Img/github-brands-solid.svg') }}"
                 alt=""
             /></a>
             <a href="#" class="icon"
               ><img
-                src="../Img/linkedin-in-brands-solid.svg"
+                src="{{ url_for('static', filename='Img/linkedin-in-brands-solid.svg') }}"
                 alt=""
             /></a>
           </div>
           <span>or use your email for registration</span>
+          {% if reg_error %}
+          <div class="error-message">{{ reg_error }}</div>
+          {% endif %}
           <input type="text" name="name" placeholder="Name" required />
           <input type="email" name="email" placeholder="Email" required />
           <input
@@ -58,31 +62,34 @@
 
       <!-- Sign In Form -->
       <div class="form-container sign-in">
-        <form action="{{ url_for('login') }}" method="POST">
+        <form action="/login" method="POST">
           <h1>Sign In</h1>
           <div class="social-icons">
             <a href="#" class="icon"
               ><img
-                src="../Img/google-brands-solid.svg"
+                src="{{ url_for('static', filename='Img/google-brands-solid.svg') }}"
                 alt=""
             /></a>
             <a href="#" class="icon"
               ><img
-                src="../Img/facebook-f-brands-solid.svg"
+                src="{{ url_for('static', filename='Img/facebook-f-brands-solid.svg') }}"
                 alt=""
             /></a>
             <a href="#" class="icon"
               ><img
-                src="../Img/github-brands-solid.svg"
+                src="{{ url_for('static', filename='Img/github-brands-solid.svg') }}"
                 alt=""
             /></a>
             <a href="#" class="icon"
               ><img
-                src="../Img/linkedin-in-brands-solid.svg"
+                src="{{ url_for('static', filename='Img/linkedin-in-brands-solid.svg') }}"
                 alt=""
             /></a>
           </div>
           <span>or use your email password</span>
+          {% if error %}
+          <div class="error-message">{{ error }}</div>
+          {% endif %}
           <input type="email" name="email" placeholder="Email" required />
           <input
             type="password"
@@ -114,6 +121,7 @@
       </div>
     </div>
 
-    <script src="../js/login.js"></script>
+    <script src="{{ url_for('static', filename='js/login.js') }}"></script>
   </body>
 </html>
+<li><a href="{{ url_for('dashboard') }}">Dashboard</a></li>

@@ -143,16 +143,7 @@
   }
   [data-snap="true"].scroll-active {
     z-index: 2;
-  }
-  h2,
-  li:last-of-type {
-    background: linear-gradient(
-      white 50%,
-      color-mix(in oklch, black, white 25%)
-    );
-    background-clip: text;
-    color: #0000;
-  }
+    }
 }
 
 @layer demo {

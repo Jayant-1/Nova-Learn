@@ -4,14 +4,25 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Nova Learn</title>
+    <link
+      rel="icon"
+      type="image/x-icon"
+      href="{{ url_for('static', filename='Img/logo-2.png') }}"
+    />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
       href="https://fonts.googleapis.com/css2?family=Exo+2:ital,wght@0,100..900;1,100..900&display=swap"
       rel="stylesheet"
     />
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}" />
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" />
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='css/main.css') }}"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"
+    />
   </head>
   <body class="dark-mode">
     <div class="page-loader">
@@ -23,32 +34,49 @@
       <!-- Sidebar -->
       <aside class="sidebar">
         <div class="sidebar-header">
-          <img id="logo-img" src="{{ url_for('static', filename='Img/image.png') }}" alt="Logo" />
+          <a href="/" id="logo">
+            <img
+              id="logo-img"
+              her
+              src="{{ url_for('static', filename='Img/image.png') }}"
+              alt="Logo"
+            />
+          </a>
           <h3>My Roadmaps</h3>
         </div>
-        
+
         <div class="sidebar-content">
           <ul class="roadmap-list">
-            {% if roadmaps %}
-              {% for map in roadmaps %}
-                <li class="roadmap-item {{ 'active' if roadmap and roadmap.id == map.id else '' }}">
-                  <a href="/view-roadmap/{{ map.id }}">
-                    <span class="roadmap-title">{{ map.subject }}</span>
-                    <span class="roadmap-date">{{ map.created_at.split(' ')[0] }}</span>
-                  </a>
-                </li>
-              {% endfor %}
-            {% else %}
-              <li class="empty-list">No saved roadmaps yet</li>
+            {% if roadmaps %} {% for map in roadmaps %}
+            <li
+              class="roadmap-item {{ 'active' if roadmap and roadmap.id == map.id else '' }}"
+            >
+              <a href="/view-roadmap/{{ map.id }}">
+                <span class="roadmap-title">{{ map.subject }}</span>
+                <span class="roadmap-date"
+                  >{{ map.created_at.split(' ')[0] }}</span
+                >
+              </a>
+            </li>
+            {% endfor %} {% else %}
+            <li class="empty-list">No saved roadmaps yet</li>
             {% endif %}
           </ul>
         </div>
-        
+
         <div class="sidebar-footer">
           <a href="/" class="new-roadmap-btn">Create New Roadmap</a>
           <button id="toggle-theme" class="theme-toggle">
-            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
-              <path d="M8 11a3 3 0 1 1 0-6 3 3 0 0 1 0 6zm0 1a4 4 0 1 0 0-8 4 4 0 0 0 0 8zM8 0a.5.5 0 0 1 .5.5v2a.5.5 0 0 1-1 0v-2A.5.5 0 0 1 8 0zm0 13a.5.5 0 0 1 .5.5v2a.5.5 0 0 1-1 0v-2A.5.5 0 0 1 8 13zm8-5a.5.5 0 0 1-.5.5h-2a.5.5 0 0 1 0-1h2a.5.5 0 0 1 .5.5zM3 8a.5.5 0 0 1-.5.5h-2a.5.5 0 0 1 0-1h2A.5.5 0 0 1 3 8zm10.657-5.657a.5.5 0 0 1 0 .707l-1.414 1.415a.5.5 0 1 1-.707-.708l1.414-1.414a.5.5 0 0 1 .707 0zm-9.193 9.193a.5.5 0 0 1 0 .707L3.05 13.657a.5.5 0 0 1-.707-.707l1.414-1.414a.5.5 0 0 1 .707 0zm9.193 2.121a.5.5 0 0 1-.707 0l-1.414-1.414a.5.5 0 0 1 .707-.707l1.414 1.414a.5.5 0 0 1 0 .707zM4.464 4.465a.5.5 0 0 1-.707 0L2.343 3.05a.5.5 0 1 1 .707-.707l1.414 1.414a.5.5 0 0 1 0 .708z"/>
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="16"
+              height="16"
+              fill="currentColor"
+              viewBox="0 0 16 16"
+            >
+              <path
+                d="M8 11a3 3 0 1 1 0-6 3 3 0 0 1 0 6zm0 1a4 4 0 1 0 0-8 4 4 0 0 0 0 8zM8 0a.5.5 0 0 1 .5.5v2a.5.5 0 0 1-1 0v-2A.5.5 0 0 1 8 0zm0 13a.5.5 0 0 1 .5.5v2a.5.5 0 0 1-1 0v-2A.5.5 0 0 1 8 13zm8-5a.5.5 0 0 1-.5.5h-2a.5.5 0 0 1 0-1h2a.5.5 0 0 1 .5.5zM3 8a.5.5 0 0 1-.5.5h-2a.5.5 0 0 1 0-1h2A.5.5 0 0 1 3 8zm10.657-5.657a.5.5 0 0 1 0 .707l-1.414 1.415a.5.5 0 1 1-.707-.708l1.414-1.414a.5.5 0 0 1 .707 0zm-9.193 9.193a.5.5 0 0 1 0 .707L3.05 13.657a.5.5 0 0 1-.707-.707l1.414-1.414a.5.5 0 0 1 .707 0zm9.193 2.121a.5.5 0 0 1-.707 0l-1.414-1.414a.5.5 0 0 1 .707-.707l1.414 1.414a.5.5 0 0 1 0 .707zM4.464 4.465a.5.5 0 0 1-.707 0L2.343 3.05a.5.5 0 1 1 .707-.707l1.414 1.414a.5.5 0 0 1 0 .708z"
+              />
             </svg>
           </button>
         </div>
@@ -65,41 +93,86 @@
             </div>
             <ul class="nav-list">
               <li><a href="/">Home</a></li>
-              <li><a href="{{ url_for('static', filename='html/about.html') }}">About</a></li>
-              <li><a href="{{ url_for('static', filename='html/Contact-Us.html') }}">Contact Us</a></li>
+              <li><a href="{{ url_for('dashboard') }}">Dashboard</a></li>
+              <li>
+                <a href="{{ url_for('static', filename='html/about.html') }}"
+                  >About</a
+                >
+              </li>
+              <li>
+                <a
+                  href="{{ url_for('static', filename='html/Contact-Us.html') }}"
+                  >Contact Us</a
+                >
+              </li>
             </ul>
+            <div class="login">
+              <div class="profile-circle">
+                {% if user %} {{ user.name[0] | upper }} {% else %}
+                <a
+                  href="{{ url_for('login') }}"
+                  style="color: white; text-decoration: none"
+                >
+                  <button id="btn-sign" type="button">Sign In</button>
+                </a>
+                {% endif %}
+              </div>
+            </div>
           </nav>
         </header>
-        
+
         <div class="dashboard-container animate__animated animate__fadeIn">
           <h1 class="dashboard-title">Your Learning Dashboard</h1>
-          
+
           {% if roadmap %}
-            <div class="saved-roadmap animate__animated animate__fadeInUp">
-              <h2>{{ roadmap.subject }}</h2>
-              <div class="roadmap-details">
-                <span class="roadmap-date">Created: {{ roadmap.created_at }}</span>
-              </div>
-              <div class="roadmap-content scroll-reveal">
-                {{ roadmap.content | md_to_html }}
-              </div>
+          <div class="saved-roadmap animate__animated animate__fadeInUp">
+            <h2>{{ roadmap.subject }}</h2>
+            <div class="roadmap-details">
+              <span class="roadmap-date"
+                >Created: {{ roadmap.created_at }}</span
+              >
             </div>
+            <div class="roadmap-content scroll-reveal">
+              {{ roadmap.content | md_to_html }}
+            </div>
+            <div class="quiz-section">
+              <a href="{{ url_for('quiz_page', subject='{{ roadmap.subject }}') }}">
+                <button id="generate-quiz" class="quiz-button">
+                  Generate Quiz
+                </button>
+              </a>
+            </div>
+          </div>
           {% else %}
-            <div class="no-roadmap animate__animated animate__fadeInUp">
-              <div class="empty-state">
-                <svg xmlns="http://www.w3.org/2000/svg" width="80" height="80" fill="currentColor" viewBox="0 0 16 16">
-                  <path d="M15.502 1.94a.5.5 0 0 1 0 .706L14.459 3.69l-2-2L13.502.646a.5.5 0 0 1 .707 0l1.293 1.293zm-1.75 2.456-2-2L4.939 9.21a.5.5 0 0 0-.121.196l-.805 2.414a.25.25 0 0 0 .316.316l2.414-.805a.5.5 0 0 0 .196-.12l6.813-6.814z"/>
-                  <path fill-rule="evenodd" d="M1 13.5A1.5 1.5 0 0 0 2.5 15h11a1.5 1.5 0 0 0 1.5-1.5v-6a.5.5 0 0 0-1 0v6a.5.5 0 0 1-.5.5h-11a.5.5 0 0 1-.5-.5v-11a.5.5 0 0 1 .5-.5H9a.5.5 0 0 0 0-1H2.5A1.5 1.5 0 0 0 1 2.5v11z"/>
-                </svg>
-                <h2>Select a Roadmap</h2>
-                <p>Select a roadmap from the sidebar or <a href="/">generate a new one</a> to get started!</p>
-              </div>
+          <div class="no-roadmap animate__animated animate__fadeInUp">
+            <div class="empty-state">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="80"
+                height="80"
+                fill="currentColor"
+                viewBox="0 0 16 16"
+              >
+                <path
+                  d="M15.502 1.94a.5.5 0 0 1 0 .706L14.459 3.69l-2-2L13.502.646a.5.5 0 0 1 .707 0l1.293 1.293zm-1.75 2.456-2-2L4.939 9.21a.5.5 0 0 0-.121.196l-.805 2.414a.25.25 0 0 0 .316.316l2.414-.805a.5.5 0 0 0 .196-.12l6.813-6.814z"
+                />
+                <path
+                  fill-rule="evenodd"
+                  d="M1 13.5A1.5 1.5 0 0 0 2.5 15h11a1.5 1.5 0 0 0 1.5-1.5v-6a.5.5 0 0 0-1 0v6a.5.5 0 0 1-.5.5h-11a.5.5 0 0 1-.5-.5v-11a.5.5 0 0 1 .5-.5H9a.5.5 0 0 0 0-1H2.5A1.5 1.5 0 0 0 1 2.5v11z"
+                />
+              </svg>
+              <h2>Select a Roadmap</h2>
+              <p>
+                Select a roadmap from the sidebar or
+                <a href="/">generate a new one</a> to get started!
+              </p>
             </div>
+          </div>
           {% endif %}
         </div>
       </main>
     </div>
-    
+
     <script src="{{ url_for('static', filename='js/main.js') }}"></script>
   </body>
 </html>

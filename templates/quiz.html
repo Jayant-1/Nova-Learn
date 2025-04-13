@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Quiz: {{ subject }}</title>
+    <link
+      rel="icon"
+      type="image/x-icon"
+      href="{{ url_for('static', filename='Img/logo-2.png') }}"
+    />
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='css/temp-style.css') }}"
+    />
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='css/quiz.css') }}"
+    />
+  </head>
+  <body>
+    <div class="quiz-header">
+      <a href="{{ url_for('dashboard') }}" class="back-link"
+        >← Back to Dashboard</a
+      >
+      <h1>Quiz: {{ subject }}</h1>
+    </div>
+
+    <div class="quiz-container">
+      <div id="quiz-questions">
+        <div class="loading-container">
+          <div class="loading-spinner"></div>
+        </div>
+      </div>
+      <div class="score" id="quiz-score">
+        <div class="loading">Loading quiz questions...</div>
+      </div>
+      <div class="controls">
+        <button id="submit-quiz" disabled>Submit Quiz</button>
+      </div>
+    </div>
+
+    <script
+      type="module"
+      src="{{ url_for('static', filename='js/quiz.js') }}"
+    ></script>
+  </body>
+</html>

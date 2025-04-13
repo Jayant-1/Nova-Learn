@@ -247,3 +247,109 @@ a img {
   border: 1px solid #90caf9;
   border-radius: 5px;
 }
+.error-message {
+  background-color: rgba(255, 0, 0, 0.1);
+  color: #ff3333;
+  padding: 10px;
+  border-radius: 5px;
+  margin-bottom: 15px;
+  font-size: 0.9em;
+  text-align: center;
+  width: 100%;
+}
+
+.auth-card {
+  max-width: 400px;
+  margin: 2rem auto;
+  background-color: var(--dark-surface);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 15px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+}
+
+.auth-card .card-body {
+  padding: 2rem;
+}
+
+.auth-card h2 {
+  color: var(--dark-text);
+  margin-bottom: 1.5rem;
+  font-weight: 600;
+}
+
+.form-group label {
+  color: var(--dark-text-secondary);
+  font-weight: 500;
+  margin-bottom: 0.5rem;
+}
+
+.form-control {
+  background-color: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: var(--dark-text);
+  border-radius: 8px;
+  padding: 0.75rem 1rem;
+  transition: all 0.3s ease;
+}
+
+.form-control:focus {
+  background-color: rgba(255, 255, 255, 0.08);
+  border-color: var(--primary);
+  box-shadow: 0 0 0 2px rgba(143, 16, 183, 0.2);
+  color: var(--dark-text);
+}
+
+.btn-primary {
+  background: linear-gradient(
+    135deg,
+    var(--primary) 0%,
+    var(--primary-light) 100%
+  );
+  border: none;
+  padding: 0.75rem;
+  border-radius: 8px;
+  font-weight: 500;
+  letter-spacing: 0.5px;
+  margin-top: 1rem;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.btn-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 5px 15px rgba(143, 16, 183, 0.4);
+  background: linear-gradient(
+    135deg,
+    var(--primary) 0%,
+    var(--primary-light) 100%
+  );
+}
+
+.social-login {
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  padding-top: 1.5rem;
+  margin-top: 1.5rem;
+}
+
+.social-login p {
+  color: var(--dark-text-secondary);
+  font-size: 0.9rem;
+}
+
+.btn-outline-primary {
+  color: var(--dark-text);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  padding: 0.5rem 1rem;
+  transition: all 0.3s ease;
+}
+
+.btn-outline-primary:hover {
+  background-color: var(--primary);
+  border-color: var(--primary);
+  color: var(--dark-text);
+  transform: translateY(-2px);
+  box-shadow: 0 5px 15px rgba(143, 16, 183, 0.4);
+}
+
+.social-login .fab {
+  font-size: 1.2rem;
+}

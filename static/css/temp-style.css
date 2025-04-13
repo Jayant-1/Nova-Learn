@@ -159,6 +159,9 @@ button:focus:not(:active)::after {
         transform: scale(1);
     }
 }
+.roadmap h1{
+    display: none;
+}
 
 .roadmap h1, .roadmap h2, .roadmap h3 {
     color: #bb86fc;
@@ -252,6 +255,8 @@ button:focus:not(:active)::after {
     padding: 20px;
     text-align: center;
     border-top: 1px solid #ddd;
+    display: flex;
+    justify-content: center;
 }
 
 .confirm-button {
